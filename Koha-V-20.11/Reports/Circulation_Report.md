@@ -72,7 +72,7 @@ AND NOT EXISTS (SELECT CAST(SUBSTR(i2.barcode,2) AS int) FROM items i2
 HAVING gap_ends_at IS NOT NULL
 ```
 
-### 5) Unique title and volum count with itemtype filter
+### 5) Unique title count and volum with itemtype filter
 ```MySQL
 SELECT  items.ccode AS CollectionCode, count(title) AS Vol, count(DISTINCT biblio.biblionumber) As Title 
 from biblio 
@@ -82,8 +82,19 @@ Left join biblio_metadata on (biblioitems.biblionumber = biblio_metadata.biblion
 where items.itype=<<Item Type|itemtypes>>
 GROUP BY ccode
 ```
-### 6)
+### 6) Unique title count with details
 ```MySQL
+SELECT  title AS Title, author AS Author,biblioitems.publishercode AS Publisher,biblio.copyrightdate AS PublicationYear,biblioitems.editionstatement AS Edition,biblioitems.volume AS Volume,items.ccode AS CollectionCode,ExtractValue(biblio_metadata.metadata, '//datafield[@tag="082"]/subfield[@code="a"]') AS 'Class No.',
+ExtractValue(biblio_metadata.metadata, '//datafield[@tag="082"]/subfield[@code="b"]') AS 'Author Mark',count(*) AS Count
+from biblio 
+	LEFT JOIN items ON biblio.biblionumber = items.biblionumber 
+	LEFT JOIN biblioitems ON items.biblionumber=biblioitems.biblionumber 
+	LEFT JOIN biblio_metadata on (biblio.biblionumber=biblio_metadata.biblionumber)
+	LEFT JOIN issues iss ON (iss.itemnumber=items.itemnumber)
+    LEFT JOIN borrower_attributes b ON (b.borrowernumber=iss.borrowernumber)
+WHERE items.itype=<<itype|itemtypes>> AND items.homebranch=<<Branch|branches>> AND items.ccode=<< code|ccode>>
+GROUP BY items.biblionumber
+ORDER BY title ASC
 
 ```
 ### 7)
