@@ -72,9 +72,15 @@ AND NOT EXISTS (SELECT CAST(SUBSTR(i2.barcode,2) AS int) FROM items i2
 HAVING gap_ends_at IS NOT NULL
 ```
 
-### 5)
+### 5) Unique title and volum count with itemtype filter
 ```MySQL
-
+SELECT  items.ccode AS CollectionCode, count(title) AS Vol, count(DISTINCT biblio.biblionumber) As Title 
+from biblio 
+LEFT JOIN items ON biblio.biblionumber=items.biblionumber
+LEFT JOIN biblioitems ON items.biblionumber=biblioitems.biblionumber
+Left join biblio_metadata on (biblioitems.biblionumber = biblio_metadata.biblionumber)
+where items.itype=<<Item Type|itemtypes>>
+GROUP BY ccode
 ```
 ### 6)
 ```MySQL
